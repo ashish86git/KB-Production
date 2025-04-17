@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shoots Dashboard</title>
+    <style>
+        /* General body styles */
+        body {
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+        }
+
+        /* Sidebar styling */
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 240px;
+            height: 100%;
+            background-color: #1c1c1c;
+            padding: 20px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .sidebar h2 {
+            margin: 0;
+            margin-bottom: 30px;
+            font-size: 28px;
+            color: #ff6f61;
+            text-align: center;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .sidebar li {
+            padding: 15px 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            color: #b5b5b5;
+            text-align: center;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar li:hover,
+        .sidebar li.active {
+            color: #ffffff;
+            background-color: #ff6f61;
+            font-weight: bold;
+        }
+
+        /* Main content styling */
+        .main {
+            margin-left: 260px;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 36px;
+        }
+
+        .new-shoot {
+            background-color: #ff6f61;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .new-shoot:hover {
+            background-color: #e55b50;
+        }
+
+        /* Table container */
+        .table-container {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #1c1c1c;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .table-container h2 {
+            color: #ff6f61;
+        }
+
+        /* Table styling */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #1c1c1c;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 8px;
+            overflow: hidden;
+            color: white;
+        }
+
+        table thead {
+            background-color: #222;
+        }
+
+        table thead th {
+            padding: 15px;
+            color: #ff6f61;
+            text-align: left;
+            border-bottom: 2px solid #ff6f61;
+        }
+
+        table tbody tr {
+            transition: all 0.3s ease;
+        }
+
+        table tbody tr:hover {
+            background-color: #333;
+        }
+
+        table tbody td {
+            padding: 15px;
+            border-bottom: 1px solid #333;
+        }
+
+        table tbody td:last-child {
+            border-bottom: none;
+        }
+
+        /* Responsive Design */
+        @media screen and (max-width: 768px) {
+            .main {
+                margin-left: 0;
+            }
+
+            .sidebar {
+                position: static;
+                width: 100%;
+                height: auto;
+                box-shadow: none;
+            }
+        }
+    </style>
+
+<script>
+    function generateTable(data) {
+    let tableBody = document.querySelector("#new_shoot tbody");
+    tableBody.innerHTML = ""; 
+
+    if (!data || data.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="17">No data available</td></tr>`;
+        return;
+    }
+
+    data.forEach(row => {
+        let rowHTML = `
+            <tr>
+                <td>${row.project || "N/A"}</td>
+                <td>${row.shoot || "N/A"}</td>
+                <td>${row.custom_shoot || "N/A"}</td>
+                <td>${row.date || "N/A"}</td>
+                <td>${row.reporting_time || "N/A"}</td>
+                <td>${row.duration_hours || "0"}</td>
+                <td>${row.duration_minutes || "0"}</td>
+                <td>${row.city || "N/A"}</td>
+                <td>${row.venue || "N/A"}</td>
+                <td>${row.photographer_name || "N/A"}</td>
+                <td>${row.photographer_role || "N/A"}</td>
+                <td>${row.videographer_name || "N/A"}</td>
+                <td>${row.videographer_role || "N/A"}</td>
+                <td>${row.crew_member_name || "N/A"}</td>
+                <td>${row.crew_responsibility || "N/A"}</td>
+                <td>${row.notes || "N/A"}</td>
+                <td>${row.created_at || "N/A"}</td>
+            </tr>`;
+        tableBody.innerHTML += rowHTML;
+    });
+}
+
+function fetchData() {
+    console.log("Fetching data...");
+    fetch('/my_work/shoots_dashboard/get_shoots')
+        .then(response => response.json())
+        .then(responseData => {
+            console.log("Fetched Data:", responseData);
+            if (responseData.status === "success") {
+                generateTable(responseData.shoots);
+            } else {
+                console.error("Error fetching data:", responseData.message);
+            }
+        })
+        .catch(error => console.error("Fetch error:", error));
+}
+
+// Fetch data every 5 seconds
+setInterval(fetchData, 5000);
+document.addEventListener("DOMContentLoaded", fetchData);
+
+</script>
+
+</head>
+<body>
+    <div class="sidebar">
+        <h2>KB Studio Production</h2>
+        <ul>
+            <li><a href="{{url_for('my_work') }}">My Work</a></li>
+            <li><a href="{{ url_for('project_dashboard') }}">Projects</a></li>
+            <li class="active"><a href="#">Shoots</a></li>
+            <li><a href="#">Deliverables</a></li>
+            <li><a href="#">Tasks</a></li>
+            <li><a href="#">Galleries</a></li>
+            <li><a href="#">Proposals</a></li>
+            <li><a href="#">Forms</a></li>
+        </ul>
+    </div>
+
+    <div class="main">
+        <div class="header">
+            <h1>Shoots</h1>
+            <li><a href="{{ url_for('new_shoot') }}">New Shoot</a></li>
+        </div>
+
+        <div class="table-container">
+            <h2>new_shoot</h2>
+            <table id="new_shoot">
+                <thead>
+                    <tr>
+                        <th>Project</th>
+                        <th>Shoot</th>
+                        <th>Custom Shoot</th>
+                        <th>Date</th>
+                        <th>Reporting Time</th>
+                        <th>Duration (Hours)</th>
+                        <th>Duration (Minutes)</th>
+                        <th>City</th>
+                        <th>Venue</th>
+                        <th>Photographer Name</th>
+                        <th>Photographer Role</th>
+                        <th>Videographer Name</th>
+                        <th>Videographer Role</th>
+                        <th>Crew Member Name</th>
+                        <th>Crew Responsibility</th>
+                        <th>Notes</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+    
+</body>
+</html>

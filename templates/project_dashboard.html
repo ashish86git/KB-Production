@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        /* General Reset */
+        body, html {
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        /* Container */
+        .container {
+            display: flex;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #2e2e2e;
+            color: #fff;
+            padding: 20px;
+            height: 100vh;
+        }
+
+        .sidebar h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin: 15px 0;
+        }
+
+        .sidebar ul li a {
+            color: #fff;
+            text-decoration: none;
+        }
+
+        .sidebar ul li a:hover {
+            color: #f0a500;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+
+        /* Table Styles */
+        .table-container {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        table th, table td {
+            padding: 10px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        table th {
+            background-color: #f5f5f5;
+        }
+
+        table tr:hover {
+            background-color: #f1f1f1;
+        }
+    </style>
+
+    <script>
+        function generateTable(tableId, data, columns) {
+            let tableBody = document.querySelector(`#${tableId} tbody`);
+            tableBody.innerHTML = ""; 
+            if (data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="${columns.length}">No data available</td></tr>`;
+                return;
+            }
+
+            data.forEach(row => {
+                let rowHTML = "<tr>";
+                columns.forEach(col => {
+                    rowHTML += `<td>${row[col] || "N/A"}</td>`;
+                });
+                rowHTML += "</tr>";
+                tableBody.innerHTML += rowHTML;
+            });
+        }
+
+        function fetchData() {
+            fetch('/api/data')
+            .then(response => response.json())
+            .then(data => {
+                generateTable("projects", data.projects, ["project_name", "client_name", "package_cost","relation","phone_number","country","email"]);
+                generateTable("shoots", data.shoots, ["shoot_title", "shoot_date", "shoot_city",]);
+                generateTable("deliverables", data.deliverables, ["deliverable_title", "deliverable_cost", "deliverable_due_date"]);
+                generateTable("payment_schedule", data.payment_schedules, ["amount", "description", "due_date"]);
+                generateTable("received_payments", data.received_payments, ["received_amount", "amount_description", "paid_on"]);
+            });
+        }
+
+        setInterval(fetchData, 5000);
+    </script>
+</head>
+<body onload="fetchData()">
+    <div class="container">
+        <!-- Sidebar -->
+        <div class="sidebar">
+            <h2>KB Studio Production</h2>
+            <ul>
+                <li><a href="{{url_for('my_work') }}">My Work</a></li>
+                <li><a href="{{ url_for('project_dashboard') }}">Projects</a></li>
+                <li><a href="{{ url_for('shoots_dashboard') }}">Shoots</a></li>
+                <li><a href="#">Deliverables</a></li>
+                <li><a href="#">Payments</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="#">Tasks</a></li>
+                <li><a href="#">Galleries</a></li>
+                <li><a href="#">Proposals</a></li>
+                <li><a href="#">Forms</a></li>
+                <li><a href="#">Notifications</a></li>
+            </ul>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Navbar -->
+            <div class="navbar">
+                <input type="text" placeholder="Search client or title">
+                <a class="new-project" href="{{ url_for('new_project') }}">+ New Project</a>
+            </div>
+
+            <!-- Projects Table -->
+            <div class="table-container">
+                <h2>Projects</h2>
+                <table id="projects">
+                    <thead><tr><th>project_name</th><th>Client</th><th>Cost</th><th>relation</th><th>phone_number</th><th>country</th><th>email</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Shoots Table -->
+            <div class="table-container">
+                <h2>Shoots</h2>
+                <table id="shoots">
+                    <thead><tr><th>Title</th><th>Date</th><th>City</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Deliverables Table -->
+            <div class="table-container">
+                <h2>Deliverables</h2>
+                <table id="deliverables">
+                    <thead><tr><th>Title</th><th>Cost</th><th>Due Date</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Payment Schedule Table -->
+            <div class="table-container">
+                <h2>Payment Schedule</h2>
+                <table id="payment_schedule">
+                    <thead><tr><th>Amount</th><th>Description</th><th>Due Date</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Received Payments Table -->
+            <div class="table-container">
+                <h2>Received Payments</h2>
+                <table id="received_payments">
+                    <thead><tr><th>Amount</th><th>Description</th><th>Paid On</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
