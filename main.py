@@ -1,39 +1,49 @@
-from flask import Flask, render_template,request, redirect, url_for,jsonify,flash
-import mysql.connector
+from flask import Flask, render_template, request, redirect, url_for, jsonify, flash
+# import mysql.connector
+import psycopg2
+from psycopg2 import OperationalError
+import psycopg2
+from psycopg2.extras import RealDictCursor
 from werkzeug.security import generate_password_hash
 import time
 from flask import session
-from mysql.connector import Error
+# from mysql.connector import Error
 from werkzeug.security import generate_password_hash, check_password_hash  # For secure password storage
 from werkzeug.security import generate_password_hash, check_password_hash
 from itsdangerous import URLSafeTimedSerializer
-from flask_mail import Mail, Message
-
+# from flask_mail import Mail, Message
 
 app = Flask(__name__)
 app.secret_key = "your_secret_key"
 # Database configurationpythone
+# PostgreSQL database configuration
 db_config = {
-    'host': '127.0.0.1',
-    'user': 'root',
-    'password': 'WJ28@krhps',
-    'database': 'Kb_production',
-    'port': 3306
+    'host': 'c7s7ncbk19n97r.cluster-czrs8kj4isg7.us-east-1.rds.amazonaws.com',
+    'user': 'u7tqojjihbpn7s',
+    'password': 'p1b1897f6356bab4e52b727ee100290a84e4bf71d02e064e90c2c705bfd26f4a5',
+    'database': 'd8lp4hr6fmvb9m',
+    'port': 5432
 }
 
 # Test database connection on startup
 try:
-    conn = mysql.connector.connect(**db_config)
-    if conn.is_connected():
-        print("Connected to the database")
+    conn = psycopg2.connect(
+        host=db_config['host'],
+        user=db_config['user'],
+        password=db_config['password'],
+        dbname=db_config['database'],
+        port=db_config['port']
+    )
+    print("Connected to the PostgreSQL database")
     conn.close()
-except Error as err:
+except OperationalError as err:
     print(f"Database connection failed: {err}")
 
 
 @app.route('/')
 def home():
     return render_template('home.html')
+
 
 @app.route('/hrms')
 def hrms():
@@ -63,30 +73,33 @@ def create_profile():
         hashed_password = generate_password_hash(password)
 
         try:
-            # Connect to the database
-            conn = mysql.connector.connect(**db_config)
+            # Connect to PostgreSQL database
+            conn = psycopg2.connect(
+                host=db_config['host'],
+                user=db_config['user'],
+                password=db_config['password'],
+                dbname=db_config['database'],
+                port=db_config['port']
+            )
             cursor = conn.cursor()
 
-            # Corrected SQL query: Matches placeholders with parameters
-            query = "INSERT INTO users (username, email, password,password_confirm) VALUES (%s, %s, %s,%s)"
-            values = (username, email, hashed_password,password_confirm)
+            # Insert user into PostgreSQL
+            query = "INSERT INTO users (username, email, password) VALUES (%s, %s, %s)"
+            values = (username, email, hashed_password)
 
-            cursor.execute(query, values)  # Execute query with proper parameters
+            cursor.execute(query, values)
             conn.commit()
 
-            # Close connections
             cursor.close()
             conn.close()
 
             return redirect(url_for('home'))
 
-        except Error as err:
-            print(f"Database Error: {err}")  # Debugging message
+        except OperationalError as err:
+            print(f"Database Error: {err}")
             return jsonify({'status': 'error', 'message': 'Failed to sign up'}), 500
 
-    # Render the create profile template
     return render_template('create_profile.html')
-
 
 @app.route('/signin', methods=['GET', 'POST'])
 def signin():
@@ -100,28 +113,34 @@ def signin():
             return render_template('login.html', error="Email and password are required!")
 
         try:
-            # Connect to the database
-            conn = mysql.connector.connect(**db_config)
-            cursor = conn.cursor(dictionary=True)  # Fetch results as dictionary
+            # Connect to PostgreSQL database
+            conn = psycopg2.connect(
+                host=db_config['host'],
+                user=db_config['user'],
+                password=db_config['password'],
+                dbname=db_config['database'],
+                port=db_config['port']
+            )
+            cursor = conn.cursor()
 
             # Query to fetch user details
-            query = "SELECT  email, password FROM users WHERE email = %s"
+            query = "SELECT email, password FROM users WHERE email = %s"
             cursor.execute(query, (email,))
-            user = cursor.fetchone()
+            result = cursor.fetchone()
 
             cursor.close()
             conn.close()
 
             # Check if user exists and verify password
-            if user and check_password_hash(user['password'], password):
-                # Store user ID in session
-                #session['user_id'] = user['id']
-                return redirect(url_for('my_work'))  # Redirect to dashboard
+            if result:
+                user_email, user_password_hash = result
+                if check_password_hash(user_password_hash, password):
+                    # session['user_id'] = user_id  # Add if needed
+                    return redirect(url_for('my_work'))  # Redirect to dashboard
 
-            # Authentication failed
             return render_template('login.html', error="Invalid email or password!")
 
-        except Error as err:
+        except OperationalError as err:
             print(f"Database Error: {err}")
             return jsonify({'status': 'error', 'message': 'Login failed'}), 500
 
@@ -143,73 +162,70 @@ def my_work():
 def project_dashboard():
     return render_template('project_dashboard.html')
 
+
 # Route for Dashboard (Main Page)
 @app.route('/dashboard')
 def dashboard():
+    conn = None
+    cursor = None
     try:
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor(dictionary=True)
+        conn = psycopg2.connect(**db_config)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        # Fetch all projects
+        # Fetch all tables
         cursor.execute("SELECT * FROM projects ORDER BY project_id DESC")
         projects = cursor.fetchall()
 
-        # Fetch all shoots
-        cursor.execute("SELECT * FROM shoots ORDER BY shoot_id DESC")
+        cursor.execute("SELECT * FROM new_shoot ORDER BY shoot_id DESC")
         shoots = cursor.fetchall()
 
-        # Fetch all deliverables
         cursor.execute("SELECT * FROM deliverables ORDER BY deliverable_id DESC")
         deliverables = cursor.fetchall()
 
-        # Fetch all payment schedules
         cursor.execute("SELECT * FROM payment_schedule ORDER BY payment_id DESC")
         payment_schedules = cursor.fetchall()
 
-        # Fetch all received payments
         cursor.execute("SELECT * FROM received_payments ORDER BY received_id DESC")
         received_payments = cursor.fetchall()
 
-        return render_template('dashboard.html', 
-                               projects=projects, 
-                               shoots=shoots, 
-                               deliverables=deliverables, 
-                               payment_schedules=payment_schedules, 
+        return render_template('dashboard.html',
+                               projects=projects,
+                               shoots=shoots,
+                               deliverables=deliverables,
+                               payment_schedules=payment_schedules,
                                received_payments=received_payments)
 
-    except mysql.connector.Error as err:
+    except psycopg2.Error as err:
         print(f"Database Error: {err}")
         return "Error fetching data", 500
 
     finally:
-        cursor.close()
-        conn.close()
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 
 
-# 📌 API to Fetch Data for Auto-Refresh
 @app.route('/api/data', methods=['GET'])
 def fetch_data():
+    conn = None
+    cursor = None
     try:
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor(dictionary=True)
+        conn = psycopg2.connect(**db_config)
+        cursor = conn.cursor(cursor_factory=RealDictCursor)
 
-        # Fetch all projects
         cursor.execute("SELECT * FROM projects ORDER BY project_id DESC")
         projects = cursor.fetchall()
 
-        # Fetch all shoots
-        cursor.execute("SELECT * FROM shoots ORDER BY shoot_id DESC")
+        cursor.execute("SELECT * FROM new_shoot ORDER BY shoot_id DESC")
         shoots = cursor.fetchall()
 
-        # Fetch all deliverables
         cursor.execute("SELECT * FROM deliverables ORDER BY deliverable_id DESC")
         deliverables = cursor.fetchall()
 
-        # Fetch all payment schedules
         cursor.execute("SELECT * FROM payment_schedule ORDER BY payment_id DESC")
         payment_schedules = cursor.fetchall()
 
-        # Fetch all received payments
         cursor.execute("SELECT * FROM received_payments ORDER BY received_id DESC")
         received_payments = cursor.fetchall()
 
@@ -221,13 +237,14 @@ def fetch_data():
             'received_payments': received_payments
         })
 
-    except mysql.connector.Error as err:
+    except psycopg2.Error as err:
         return jsonify({'error': str(err)}), 500
 
     finally:
-        cursor.close()
-        conn.close()
-
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
 # @app.route('/my_work/project_dashboard/new_project')
 # def new_project():
 #     return render_template('new_project.html')
@@ -235,10 +252,10 @@ def fetch_data():
 def new_project():
     if request.method == 'POST':
         try:
-            conn = mysql.connector.connect(**db_config)
+            conn = psycopg2.connect(**db_config)
             cursor = conn.cursor()
 
-            # Retrieve form data
+            # Project data
             project_name = request.form.get('project_name')
             package_cost = request.form.get('package_cost')
             client_name = request.form.get('client_name')
@@ -247,111 +264,114 @@ def new_project():
             country = request.form.get('country')
             email = request.form.get('email')
 
-            # Insert into projects table
             insert_project_query = """
-            INSERT INTO projects (project_name, package_cost, client_name, relation, phone_number, country, email)
-            VALUES (%s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO projects (project_name, package_cost, client_name, relation, phone_number, country, email)
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+                RETURNING project_id;
             """
             cursor.execute(insert_project_query, (project_name, package_cost, client_name, relation, phone_number, country, email))
-            project_id = cursor.lastrowid  # Get the ID of the inserted project
+            project_id = cursor.fetchone()[0]
 
-            #Insert Shoots
-            shoot_title = request.form.get('shoot_title[]')
-            shoot_date = request.form.get('shoot_date[]')
-            shoot_time = request.form.get('shoot_time[]')
-            shoot_city = request.form.get('shoot_city[]')
+            # Shoots
+            shoot_title = request.form.getlist('shoot_title[]')
+            shoot_date = request.form.getlist('shoot_date[]')
+            shoot_time = request.form.getlist('shoot_time[]')
+            shoot_city = request.form.getlist('shoot_city[]')
 
             insert_shoot_query = """
-            INSERT INTO shoots (project_id, shoot_title, shoot_date, shoot_time, shoot_city)
-            VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO shoots (project_id, shoot_title, shoot_date, shoot_time, shoot_city)
+                VALUES (%s, %s, %s, %s, %s)
             """
-            for title, date, time, city in zip(shoot_title, shoot_date, shoot_time,shoot_city):
-                cursor.execute(insert_shoot_query, (project_id,shoot_title,shoot_date,shoot_time,shoot_city))
+            for title, date, time, city in zip(shoot_title, shoot_date, shoot_time, shoot_city):
+                cursor.execute(insert_shoot_query, (project_id, title, date, time, city))
 
-            # Insert Deliverables
-            deliverable_title = request.form.get('deliverable_title[]')
-            deliverable_cost = request.form.get('deliverable_cost[]')
-            deliverable_quantity = request.form.get('deliverable_quantity[]')
-            deliverable_due_date = request.form.get('deliverable_due_date[]')
+            # Deliverables
+            deliverable_title = request.form.getlist('deliverable_title[]')
+            deliverable_cost = request.form.getlist('deliverable_cost[]')
+            deliverable_quantity = request.form.getlist('deliverable_quantity[]')
+            deliverable_due_date = request.form.getlist('deliverable_due_date[]')
 
             insert_deliverable_query = """
-            INSERT INTO deliverables (project_id, deliverable_title, deliverable_cost, deliverable_quantity, deliverable_due_date)
-            VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO deliverables (project_id, deliverable_title, deliverable_cost, deliverable_quantity, deliverable_due_date)
+                VALUES (%s, %s, %s, %s, %s)
             """
             for title, cost, quantity, due_date in zip(deliverable_title, deliverable_cost, deliverable_quantity, deliverable_due_date):
-                cursor.execute(insert_deliverable_query, (project_id, deliverable_title, deliverable_cost, deliverable_quantity, deliverable_due_date))
+                cursor.execute(insert_deliverable_query, (project_id, title, cost, quantity, due_date))
 
-            # # Insert Payment Schedule
+            # Payment Schedule
             amount = request.form.getlist('amount[]')
             description = request.form.getlist('description[]')
             due_date = request.form.getlist('due_date[]')
 
             insert_payment_query = """
-            INSERT INTO payment_schedule (project_id, amount, description, due_date)
-            VALUES (%s, %s, %s, %s)
+                INSERT INTO payment_schedule (project_id, amount, description, due_date)
+                VALUES (%s, %s, %s, %s)
             """
+            for a, desc, d in zip(amount, description, due_date):
+                cursor.execute(insert_payment_query, (project_id, a, desc, d))
 
-            for amount, description, due_date in zip(amount, description, due_date):
-                cursor.execute(insert_payment_query, (project_id, amount, description, due_date))
-            
-            conn.commit()  
-            return jsonify({'status': 'success', 'message': 'Project added successfully!'}), 400
+            conn.commit()
+            return jsonify({'status': 'success', 'message': 'Project added successfully!'})
 
-        except Error as err:
+        except psycopg2.Error as err:
             print(f"Database Error: {err}")
-            return jsonify({'status': 'error', 'message': 'Login failed'}), 500
+            return jsonify({'status': 'error', 'message': 'Project creation failed'}), 500
+
         finally:
             cursor.close()
             conn.close()
 
-        return redirect('/my_work/project_dashboard/new_project')
-
     return render_template('new_project.html')
 
 
+# @app.route('/my_work/shoots_dashboard')
+# def shoots_dashboard():
+#     return render_template('shoots_dashboard.html')
 
 
-@app.route('/my_work/shoots_dashboard')
+@app.route("/my_work/shoots_dashboard")
 def shoots_dashboard():
-    return render_template('shoots_dashboard.html')
+    conn = psycopg2.connect(**db_config)
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-@app.route('/my_work/shoots_dashboard/get_shoots', methods=['GET'])
+    cursor.execute("SELECT * FROM new_shoot ORDER BY created_at DESC")
+    shoots = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return render_template("shoots_dashboard.html", shoots=shoots)
+
+
+@app.route('/my_work/shoots_dashboard/get_shoots')
 def get_shoots():
     try:
-        conn = mysql.connector.connect(**db_config)
-        cursor = conn.cursor(dictionary=True)  # Returns data as dictionaries
-
-        # Fetch all shoot records
-        cursor.execute("SELECT * FROM new_shoot")
-        shoots = cursor.fetchall()  # Returns a list of dictionaries
-        #print(shoots)
-        return jsonify({
-            'status': 'success',
-            'shoots': shoots
-        })
-    except mysql.connector.Error as err:
-        print(f"Database Error: {err}")
-        return jsonify({'status': 'error', 'message': 'Database Error'}), 500
-
-    finally:
-        if cursor:
-            cursor.close()
-        if conn:
-            conn.close()
-
+        conn = psycopg2.connect(**db_config)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("SELECT * FROM new_shoot ORDER BY created_at DESC;")
+        rows = cur.fetchall()
+        shoots = [dict(row) for row in rows]
+        cur.close()
+        conn.close()
+        return jsonify({"status": "success", "shoots": shoots})
+    except Exception as e:
+        print("Error:", e)
+        return jsonify({"status": "error", "message": str(e)})
 
 
 @app.route('/my_work/shoots_dashboard/new_shoot', methods=['GET', 'POST'])
 def new_shoot():
     if request.method == 'POST':
+        conn = None
+        cursor = None
         try:
-            # Connect to Database
-            conn = mysql.connector.connect(**db_config)
+            conn = psycopg2.connect(**db_config)
             cursor = conn.cursor()
-            # Get Form Data
+
+            # Fetch form data
             project = request.form.get('project', '').strip()
             shoot = request.form.get('shoot', '').strip()
-            custom_shoot = request.form.get('custom_shoot', '').strip()  
+            custom_shoot = request.form.get('custom_shoot', '').strip()
             date = request.form.get('date', '').strip()
             reporting_time = request.form.get('reporting_time', '').strip()
             duration_hours = request.form.get('duration_hours', '0').strip()
@@ -366,46 +386,44 @@ def new_shoot():
             crew_responsibility = request.form.get('crew_responsibility', '').strip()
             notes = request.form.get('notes', '').strip()
 
-            # If "Other" is selected, use custom_shoot value
             shoot_type = custom_shoot if shoot == "Other" and custom_shoot else shoot
 
-            # ✅ Corrected SQL Query (15 placeholders for 15 values)
             insert_query = """
-            INSERT INTO new_shoot (
-                project, shoot, date, reporting_time, duration_hours, duration_minutes, city, venue, 
-                photographer_name, photographer_role, videographer_name, videographer_role,
-                crew_member_name, crew_responsibility, notes
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                INSERT INTO new_shoot (
+                    project, shoot, custom_shoot, date, reporting_time, duration_hours, duration_minutes,
+                    city, venue, photographer_name, photographer_role, videographer_name, videographer_role,
+                    crew_member_name, crew_responsibility, notes, created_at
+                ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
             """
-            
-            # ✅ Corrected Values (15 values matching the 15 placeholders)
+
             values = (
-                project, shoot_type, date, reporting_time, duration_hours, duration_minutes, city, venue,
-                photographer_name, photographer_role, videographer_name, videographer_role,
-                crew_member_name, crew_responsibility, notes
+                project, shoot_type, custom_shoot, date, reporting_time, duration_hours, duration_minutes,
+                city, venue, photographer_name, photographer_role, videographer_name, videographer_role,
+                crew_member_name, crew_responsibility, notes, datetime.now()
             )
 
-            # Execute Query
             cursor.execute(insert_query, values)
             conn.commit()
 
-            return jsonify({'status': 'success', "message": "Submitted successfully!"})
+            return jsonify({'status': 'success', 'message': 'Shoot saved successfully!'})
 
-        except mysql.connector.Error as err:
-            print(f"Database Error: {err}")
-            return jsonify({'status': 'error', 'message': 'Failed'}), 500
-
+        except Exception as err:
+            print("Error:", err)
+            return jsonify({'status': 'error', 'message': str(err)}), 500
         finally:
-            cursor.close()
-            conn.close()
+            if cursor:
+                cursor.close()
+            if conn:
+                conn.close()
+    else:
+        return render_template('new_shoot.html')
 
-    # Render the new_shoot.html template for GET requests
-    return render_template('new_shoot.html')
 
 
 @app.route('/my_work/deliverables')
 def deliverables():
     return render_template('deliverables.html')
+
 
 @app.route('/my_work/deliverables/new_deliverables')
 def new_deliverables():
@@ -415,6 +433,7 @@ def new_deliverables():
 @app.route('/my_work/task_dashboard')
 def task_dashboard():
     return render_template('task_dashboard.html')
+
 
 if __name__ == '__main__':
     app.run(debug=True)
