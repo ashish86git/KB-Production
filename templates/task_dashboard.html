@@ -6,217 +6,245 @@
     <title>Tasks Dashboard</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
             margin: 0;
-            background-color: #1a1a1a;
-            color: #fff;
+            font-family: 'Inter', sans-serif;
+            background-color: #0f0f10;
+            color: #e0e0e0;
         }
 
+        /* Sidebar */
         .sidebar {
             width: 250px;
-            background-color: #111;
-            height: 100vh;
+            background-color: #18181b;
             position: fixed;
             top: 0;
             left: 0;
-            padding: 20px;
-            box-sizing: border-box;
+            height: 100%;
+            padding: 30px 20px;
+            box-shadow: 3px 0 8px rgba(0, 0, 0, 0.6);
         }
 
         .sidebar h2 {
-            color: #fff;
-            font-size: 18px;
-            margin-bottom: 20px;
+            font-size: 24px;
+            color: #4fbcff;
+            text-align: center;
+            margin-bottom: 40px;
         }
 
         .sidebar ul {
-            list-style-type: none;
+            list-style: none;
             padding: 0;
         }
 
         .sidebar ul li {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
 
         .sidebar ul li a {
-            color: #ccc;
+            color: #a5a5a5;
             text-decoration: none;
-            font-size: 14px;
+            font-weight: 500;
+            display: block;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            transition: 0.3s ease;
         }
 
-        .sidebar ul li a:hover {
-            color: #fff;
+        .sidebar ul li a:hover,
+        .sidebar ul li a.active {
+            background-color: #4fbcff;
+            color: #0f0f10;
         }
 
+        /* Main content area */
         .main-content {
             margin-left: 270px;
-            padding: 20px;
+            padding: 40px;
         }
 
+        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
         .header h1 {
-            margin: 0;
-            font-size: 24px;
+            font-size: 28px;
+            font-weight: 600;
         }
 
         .header .actions {
             display: flex;
+            gap: 10px;
             align-items: center;
-            gap: 15px;
         }
 
-        .search-bar {
-            background-color: #333;
-            padding: 10px;
-            border-radius: 5px;
+        .header .actions .search-bar {
+            padding: 8px;
+            width: 250px;
+            border-radius: 6px;
             border: 1px solid #444;
-            color: #fff;
-            width: 300px;
+            background-color: #2d2d2d;
+            color: #d0d0d0;
         }
 
-        .button {
-            padding: 10px 15px;
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            border-radius: 5px;
+        .header .actions .button {
+            background-color: #4fbcff;
+            color: #0f0f10;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
             cursor: pointer;
         }
 
-        .button:hover {
-            background-color: #0056b3;
+        .header .actions .button:hover {
+            background-color: #38a8e0;
         }
 
+        /* Filters */
         .filters {
+            margin-bottom: 30px;
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 15px;
+            flex-wrap: wrap;
         }
 
         .filters button {
-            padding: 5px 10px;
-            background-color: #333;
-            color: #fff;
+            background-color: #292933;
             border: none;
-            border-radius: 5px;
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: #d0d0d0;
+            font-weight: 600;
             cursor: pointer;
+            transition: background-color 0.3s;
         }
 
         .filters button.active {
-            background-color: #007bff;
+            background-color: #4fbcff;
+            color: #0f0f10;
         }
 
+        .filters button:hover {
+            background-color: #38a8e0;
+        }
+
+        /* Table styles */
         .table-container {
-            background-color: #222;
+            background-color: #1c1c1f;
             border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-container h2 {
+            color: #4fbcff;
+            font-size: 20px;
+            margin-bottom: 20px;
         }
 
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 0;
-        }
-
-        table thead {
-            background-color: #333;
-        }
-
-        table thead th {
-            padding: 15px;
-            text-align: left;
             font-size: 14px;
-            color: #ccc;
         }
 
-        table tbody tr {
+        thead {
+            background-color: #2b2b30;
+        }
+
+        thead th {
+            padding: 14px 12px;
+            text-align: left;
+            color: #4fbcff;
             border-bottom: 1px solid #444;
         }
 
-        table tbody tr:hover {
-            background-color: #2a2a2a;
+        tbody tr {
+            border-bottom: 1px solid #2d2d2d;
+            transition: 0.2s;
         }
 
-        table tbody td {
-            padding: 15px;
-            font-size: 14px;
+        tbody tr:hover {
+            background-color: #292933;
         }
 
+        tbody td {
+            padding: 12px;
+            color: #d0d0d0;
+        }
+
+        /* Modal styles */
         .modal {
             display: none;
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.8);
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
             justify-content: center;
             align-items: center;
             z-index: 1000;
         }
 
         .modal-content {
-            background-color: #222;
-            padding: 20px;
+            background-color: #2b2b30;
             border-radius: 10px;
+            padding: 20px;
             width: 400px;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            color: #d0d0d0;
         }
 
         .modal-header h2 {
-            margin: 0;
+            color: #4fbcff;
         }
 
-        .close {
-            background-color: transparent;
+        .modal .close {
+            background: none;
             border: none;
-            color: #fff;
-            font-size: 20px;
+            color: #d0d0d0;
+            font-size: 24px;
             cursor: pointer;
         }
 
-        .modal-body input,
-        .modal-body select,
-        .modal-body button {
-            width: 100%;
-            margin-bottom: 15px;
-            padding: 10px;
-            border: 1px solid #444;
-            border-radius: 5px;
-            background-color: #333;
-            color: #fff;
-        }
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
 
-        .modal-body button {
-            background-color: #007bff;
-            cursor: pointer;
-        }
+            .sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+                padding: 20px;
+            }
 
-        .modal-body button:hover {
-            background-color: #0056b3;
+            .header .actions {
+                flex-direction: column;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
 <body>
     <div class="sidebar">
-        <h2>HUEMN</h2>
+        <h2>KB Studio</h2>
         <ul>
-            <li><a href="#">My Work</a></li>
-            <li><a href="#">Projects</a></li>
-            <li><a href="#">Tasks</a></li>
-            <li><a href="#">Deliverables</a></li>
+            <li><a href="{{url_for('my_work') }}">My Work</a></li>
+            <li><a href="{{ url_for('project_dashboard') }}">Projects</a></li>
+            <li><a href="{{ url_for('shoots_dashboard') }}">Shoots</a></li>
+            <li><a href="{{ url_for('deliverables') }}">Deliverables</a></li>
+            <li><a href="{{ url_for('task_dashboard') }}">Task</a> </li>
             <li><a href="#">Galleries</a></li>
             <li><a href="#">Proposals</a></li>
             <li><a href="#">Forms</a></li>
@@ -231,17 +259,17 @@
             <h1>Tasks</h1>
             <div class="actions">
                 <input type="text" class="search-bar" placeholder="Search tasks...">
-                <button class="button" onclick="showModal()">+ New Task</button>
+<!--                <button class="button" onclick="showModal()">+ New Task</button>-->
             </div>
         </div>
 
         <div class="filters">
-            <button class="active">ALL</button>
-            <button>PENDING</button>
-            <button>TODO</button>
-            <button>IN PROGRESS</button>
-            <button>DONE</button>
-            <button>OVERDUE</button>
+            <button class="active" onclick="filterTasks('all')">ALL</button>
+            <button onclick="filterTasks('pending')">PENDING</button>
+            <button onclick="filterTasks('todo')">TODO</button>
+            <button onclick="filterTasks('in-progress')">IN PROGRESS</button>
+            <button onclick="filterTasks('done')">DONE</button>
+            <button onclick="filterTasks('overdue')">OVERDUE</button>
         </div>
 
         <div class="table-container">
@@ -257,46 +285,69 @@
                     </tr>
                 </thead>
                 <tbody>
+                    {% for task in tasks %}
                     <tr>
-                        <td>31 Jan 2025</td>
-                        <td>Finalize Proposal</td>
-                        <td class="status in-progress">In Progress</td>
-                        <td>John Doe</td>
-                        <td>High</td>
-                        <td>Admin</td>
+                        <td>{{ task.due_date.strftime('%d %b %Y') }}</td>
+                        <td>{{ task.title }}</td>
+                        <td class="status {{ task.status.lower().replace(' ', '-') }}">{{ task.status }}</td>
+                        <td>{{ task.assigned_to }}</td>
+                        <td>{{ task.priority }}</td>
+                        <td>{{ task.last_updated_by }}</td>
                     </tr>
+                    {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div class="modal" id="taskModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>New Task</h2>
-                <button class="close" onclick="closeModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <input type="text" placeholder="Title*" />
-                <select>
-                    <option>Status*</option>
-                    <option>To Do</option>
-                    <option>In Progress</option>
-                    <option>Done</option>
-                </select>
-                <select>
-                    <option>Priority*</option>
-                    <option>Low</option>
-                    <option>Medium</option>
-                    <option>High</option>
-                </select>
-                <input type="text" placeholder="Assigned To" />
-                <button>Save Task</button>
-            </div>
-        </div>
-    </div>
+<!--    &lt;!&ndash; Modal &ndash;&gt;-->
+<!--    <div class="modal" id="taskModal">-->
+<!--        <div class="modal-content">-->
+<!--            <div class="modal-header">-->
+<!--                <h2>New Task</h2>-->
+<!--                <button class="close" onclick="closeModal()">&times;</button>-->
+<!--            </div>-->
+<!--            <div class="modal-body">-->
+<!--                <input type="text" placeholder="Title*" />-->
+<!--                <select>-->
+<!--                    <option>Status*</option>-->
+<!--                    <option>To Do</option>-->
+<!--                    <option>In Progress</option>-->
+<!--                    <option>Done</option>-->
+<!--                </select>-->
+<!--                <select>-->
+<!--                    <option>Priority*</option>-->
+<!--                    <option>Low</option>-->
+<!--                    <option>Medium</option>-->
+<!--                    <option>High</option>-->
+<!--                </select>-->
+<!--                <input type="text" placeholder="Assigned To" />-->
+<!--                <button>Save Task</button>-->
+<!--            </div>-->
+<!--        </div>-->
+<!--    </div>-->
 
     <script>
+        function filterTasks(status) {
+            // Reset active class on all filter buttons
+            const buttons = document.querySelectorAll('.filters button');
+            buttons.forEach(button => button.classList.remove('active'));
+
+            // Set active class on the clicked button
+            const activeButton = [...buttons].find(button => button.textContent.toLowerCase() === status.toUpperCase());
+            if (activeButton) activeButton.classList.add('active');
+
+            // Show or hide tasks based on the filter
+            const tasks = document.querySelectorAll('.task');
+            tasks.forEach(task => {
+                if (status === 'all' || task.classList.contains(status)) {
+                    task.style.display = '';
+                } else {
+                    task.style.display = 'none';
+                }
+            });
+        }
+
         function showModal() {
             document.getElementById("taskModal").style.display = "flex";
         }

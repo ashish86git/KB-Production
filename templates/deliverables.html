@@ -6,23 +6,29 @@
     <title>Deliverables</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            background-color: #1a1a1a;
-            color: #ffffff;
             margin: 0;
-            padding: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #0f0f10;
+            color: #e0e0e0;
         }
 
-        .container {
-            display: flex;
-        }
-
+        /* Sidebar */
         .sidebar {
             width: 250px;
-            background-color: #121212;
-            height: 100vh;
-            padding: 20px 10px;
-            box-sizing: border-box;
+            background-color: #18181b;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 30px 20px;
+            box-shadow: 3px 0 8px rgba(0, 0, 0, 0.6);
+        }
+
+        .sidebar h2 {
+            font-size: 24px;
+            color: #4fbcff;
+            text-align: center;
+            margin-bottom: 40px;
         }
 
         .sidebar ul {
@@ -31,72 +37,69 @@
         }
 
         .sidebar ul li {
-            padding: 10px 15px;
-            margin: 5px 0;
-            cursor: pointer;
+            margin-bottom: 20px;
         }
 
-        .sidebar ul li:hover {
-            background-color: #333;
-            border-radius: 5px;
+        .sidebar ul li a {
+            color: #a5a5a5;
+            text-decoration: none;
+            font-weight: 500;
+            display: block;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            transition: 0.3s ease;
         }
 
-        .sidebar ul li.active {
-            background-color: #007bff;
-            border-radius: 5px;
+        .sidebar ul li a:hover,
+        .sidebar ul li a.active {
+            background-color: #4fbcff;
+            color: #0f0f10;
         }
 
+        /* Main content area */
         .content {
-            flex: 1;
-            padding: 20px;
+            margin-left: 270px;
+            padding: 40px;
+            padding-top: 30px;
         }
 
+        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #333;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .header a {
+            background-color: #4fbcff;
+            color: #0f0f10;
             padding: 10px 20px;
-            background-color: #333;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: background-color 0.3s ease;
         }
 
-        .header .search-bar {
-            display: flex;
-            align-items: center;
-            width: 100%;
-            margin-right: 20px;
+        .header a:hover {
+            background-color: #38a8e0;
         }
 
-        .header .search-bar input {
-            width: 100%;
-            padding: 10px;
-            background-color: #1a1a1a;
-            border: 1px solid #444;
-            border-radius: 5px;
-            color: white;
-        }
-
-        .header .buttons {
-            display: flex;
-            gap: 10px;
-        }
-
-        .header .buttons button {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-
-        .header .buttons button:hover {
-            background-color: #0056b3;
-        }
-
+        /* Filters */
         .filters {
             margin-top: 20px;
+            margin-bottom: 30px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
         }
 
@@ -104,112 +107,182 @@
             background-color: #333;
             color: white;
             padding: 8px 12px;
-            border: none;
-            border-radius: 5px;
+            border-radius: 6px;
+            font-size: 14px;
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
 
+        .filters button:hover,
         .filters button.active {
-            background-color: #007bff;
+            background-color: #4fbcff;
         }
 
-        .table {
+        /* Table styles */
+        .table-container {
+            background-color: #1c1c1f;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-container h2 {
+            color: #4fbcff;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        table {
             width: 100%;
-            margin-top: 20px;
             border-collapse: collapse;
+            font-size: 14px;
         }
 
-        .table th, .table td {
-            padding: 10px;
+        thead {
+            background-color: #2b2b30;
+        }
+
+        thead th {
+            padding: 14px 12px;
             text-align: left;
+            color: #4fbcff;
             border-bottom: 1px solid #444;
         }
 
-        .table th {
-            background-color: #333;
+        tbody tr {
+            border-bottom: 1px solid #2d2d2d;
+            transition: 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #292933;
+        }
+
+        tbody td {
+            padding: 12px;
+            color: #d0d0d0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+                padding: 20px;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <!-- Sidebar -->
         <div class="sidebar">
+            <h2>KB Studio</h2>
             <ul>
-                <li class="active">My Work</li>
-                <li>Projects</li>
-                <li>Shoots</li>
-                <li>Deliverables</li>
-                <li>Tasks</li>
-                <li>Galleries</li>
-                <li>Proposals</li>
-                <li>Forms</li>
-                <li>Notifications</li>
-                <li>Settings & Members</li>
-                <li>Get Help</li>
+                <li><a href="{{ url_for('my_work') }}">My Work</a></li>
+                <li><a href="{{ url_for('project_dashboard') }}">Projects</a></li>
+                <li><a href="{{ url_for('shoots_dashboard') }}">Shoots</a></li>
+                <li class="active"><a href="{{ url_for('deliverables') }}">Deliverables</a></li>
+                <li><a href="{{ url_for('task_dashboard') }}">Task</a></li>
+                <li><a href="#">Galleries</a></li>
+                <li><a href="#">Proposals</a></li>
+                <li><a href="#">Forms</a></li>
+                <li><a href="#">Notifications</a></li>
+                <li><a href="#">Settings & Members</a></li>
+                <li><a href="#">Get Help</a></li>
             </ul>
         </div>
 
+        <!-- Content -->
         <div class="content">
+            <!-- Header -->
             <div class="header">
                 <div class="search-bar">
                     <input type="text" placeholder="Search title Deliverable">
                 </div>
                 <div class="buttons">
                     <button>What's New</button>
-                    <li><a href="{{ url_for('new_deliverables') }}">New Deliverable</a></li>
-                    <button>+ New Deliverable</button>
+                    <a href="{{ url_for('new_deliverables') }}">+ New Deliverable</a>
                 </div>
             </div>
 
+            <!-- Filters -->
             <div class="filters">
-                <button class="active">ALL 623</button>
-                <button>PENDING 617</button>
-                <button>TODO 613</button>
-                <button>IN PROGRESS 2</button>
-                <button>IN REVIEW 2</button>
-                <button>DONE 6</button>
-                <button>OVERDUE 395</button>
+                <button class="active" data-status="ALL">ALL <span class="count">623</span></button>
+                <button data-status="PENDING">PENDING <span class="count">617</span></button>
+                <button data-status="TODO">TODO <span class="count">613</span></button>
+                <button data-status="IN PROGRESS">IN PROGRESS <span class="count">2</span></button>
+                <button data-status="IN REVIEW">IN REVIEW <span class="count">2</span></button>
+                <button data-status="DONE">DONE <span class="count">6</span></button>
+                <button data-status="OVERDUE">OVERDUE <span class="count">395</span></button>
             </div>
 
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Due Date</th>
-                        <th>Title</th>
-                        <th>Status</th>
-                        <th>Assigned To</th>
-                        <th>Quantity</th>
-                        <th>Priority</th>
-                        <th>Tasks</th>
-                        <th>Cost</th>
-                        <th>Last Updated</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>31 May 2025</td>
-                        <td>Full length tradition videos</td>
-                        <td>IN PROGRESS</td>
-                        <td>Shahnaaz Khan</td>
-                        <td>1</td>
-                        <td>High</td>
-                        <td>0</td>
-                        <td>Part of Package</td>
-                        <td>3 weeks ago</td>
-                    </tr>
-                    <tr>
-                        <td>22 May 2025</td>
-                        <td>Print albums</td>
-                        <td>TODO</td>
-                        <td>Unassigned</td>
-                        <td>2</td>
-                        <td>Normal</td>
-                        <td>0</td>
-                        <td>Part of Package</td>
-                        <td>3 months ago</td>
-                    </tr>
-                </tbody>
-            </table>
+            <!-- Table -->
+            <div class="table-container">
+                <table id="deliverables-table">
+                    <thead>
+                        <tr>
+                            <th>Due Date</th>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Assigned To</th>
+                            <th>Quantity</th>
+                            <th>Priority</th>
+                            <th>Tasks</th>
+                            <th>Cost</th>
+                            <th>Last Updated</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in deliverables %}
+                        <tr data-status="{{ row[2] }}">
+                            <td>{{ row[0] }}</td>
+                            <td>{{ row[1] }}</td>
+                            <td>{{ row[2] }}</td>
+                            <td>{{ row[3] }}</td>
+                            <td>{{ row[4] }}</td>
+                            <td>{{ row[5] }}</td>
+                            <td>{{ row[6] }}</td>
+                            <td>{{ row[7] }}</td>
+                            <td>{{ row[8] }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+
+    <script>
+        // Filter buttons event listener
+        const filterButtons = document.querySelectorAll('.filters button');
+        const tableRows = document.querySelectorAll('#deliverables-table tbody tr');
+
+        filterButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Toggle active class on the clicked button
+                filterButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                // Get the status to filter by
+                const status = button.getAttribute('data-status');
+
+                // Filter table rows based on the status
+                tableRows.forEach(row => {
+                    if (status === 'ALL' || row.getAttribute('data-status') === status) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
