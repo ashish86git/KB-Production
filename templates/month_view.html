@@ -1,0 +1,13 @@
+<h1>Attendance for the Current Month</h1>
+<table>
+    <tr>
+        <th>Date</th>
+        <th>Hours Worked</th>
+    </tr>
+    {% for date, hours in attendance_data.items() %}
+    <tr>
+        <td>{{ date }}</td>
+        <td>{{ hours if hours is not none else "Not Filled" }}</td>
+    </tr>
+    {% endfor %}
+</table>

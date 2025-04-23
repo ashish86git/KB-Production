@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard</title>
+  <style>
+        body {
+            margin: 0;
+            font-family: 'Inter', sans-serif;
+            background-color: #0f0f10;
+            color: #e0e0e0;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 250px;
+            background-color: #18181b;
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100%;
+            padding: 30px 20px;
+            box-shadow: 3px 0 8px rgba(0, 0, 0, 0.6);
+        }
+
+        .sidebar h2 {
+            font-size: 24px;
+            color: #4fbcff;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar ul li {
+            margin-bottom: 20px;
+        }
+
+        .sidebar ul li a {
+            color: #a5a5a5;
+            text-decoration: none;
+            font-weight: 500;
+            display: block;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            transition: 0.3s ease;
+        }
+
+        .sidebar ul li a:hover,
+        .sidebar ul li a.active {
+            background-color: #4fbcff;
+            color: #0f0f10;
+        }
+
+        /* Main content area */
+        .main-content {
+            margin-left: 270px;
+            padding: 40px;
+        }
+
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            font-weight: 600;
+        }
+
+        .header .actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .header .actions .search-bar {
+            padding: 8px;
+            width: 250px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background-color: #2d2d2d;
+            color: #d0d0d0;
+        }
+
+        .header .actions .button {
+            background-color: #4fbcff;
+            color: #0f0f10;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .header .actions .button:hover {
+            background-color: #38a8e0;
+        }
+
+        /* Filters */
+        .filters {
+            margin-bottom: 30px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .filters button {
+            background-color: #292933;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            color: #d0d0d0;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .filters button.active {
+            background-color: #4fbcff;
+            color: #0f0f10;
+        }
+
+        .filters button:hover {
+            background-color: #38a8e0;
+        }
+
+        /* Table styles */
+        .table-container {
+            background-color: #1c1c1f;
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .table-container h2 {
+            color: #4fbcff;
+            font-size: 20px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        thead {
+            background-color: #2b2b30;
+        }
+
+        thead th {
+            padding: 14px 12px;
+            text-align: left;
+            color: #4fbcff;
+            border-bottom: 1px solid #444;
+        }
+
+        tbody tr {
+            border-bottom: 1px solid #2d2d2d;
+            transition: 0.2s;
+        }
+
+        tbody tr:hover {
+            background-color: #292933;
+        }
+
+        tbody td {
+            padding: 12px;
+            color: #d0d0d0;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+        }
+
+        .modal-content {
+            background-color: #2b2b30;
+            border-radius: 10px;
+            padding: 20px;
+            width: 400px;
+            color: #d0d0d0;
+        }
+
+        .modal-header h2 {
+            color: #4fbcff;
+        }
+
+        .modal .close {
+            background: none;
+            border: none;
+            color: #d0d0d0;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        /* Navbar layout */
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
+
+        .navbar input[type="text"] {
+            padding: 8px;
+            width: 250px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background-color: #2d2d2d;
+            color: #d0d0d0;
+        }
+
+        .navbar .new-project {
+            background-color: #4fbcff;
+            color: #0f0f10;
+            padding: 10px 20px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .navbar .new-project:hover {
+            background-color: #38a8e0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .sidebar {
+                width: 100%;
+                position: static;
+                height: auto;
+                padding: 20px;
+            }
+
+            .header .actions {
+                flex-direction: column;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+        }
+    </style>
+  <script>
+    function generateTable(tableId, data, columns) {
+      let tableBody = document.querySelector(`#${tableId} tbody`);
+      tableBody.innerHTML = "";
+      if (data.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="${columns.length}">No data available</td></tr>`;
+        return;
+      }
+
+      data.forEach(row => {
+        let rowHTML = "<tr>";
+        columns.forEach(col => {
+          rowHTML += `<td>${row[col] || "N/A"}</td>`;
+        });
+        rowHTML += "</tr>";
+        tableBody.innerHTML += rowHTML;
+      });
+    }
+
+    function fetchData() {
+      fetch('/api/data')
+        .then(response => response.json())
+        .then(data => {
+          generateTable("projects", data.projects, ["project_name", "client_name", "package_cost", "relation", "phone_number", "country", "email"]);
+          generateTable("shoots", data.shoots, ["shoot_title", "shoot_date", "shoot_city"]);
+          generateTable("deliverables", data.deliverables, ["deliverable_title", "deliverable_cost", "deliverable_due_date"]);
+          generateTable("payment_schedule", data.payment_schedules, ["amount", "description", "due_date"]);
+          generateTable("received_payments", data.received_payments, ["received_amount", "amount_description", "paid_on"]);
+        });
+    }
+
+    setInterval(fetchData, 5000);
+  </script>
+</head>
+<body onload="fetchData()">
+  <div class="container">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <h2>KB Studio</h2>
+      <ul>
+        <li><a href="{{ url_for('my_work') }}">My Work</a></li>
+        <li><a href="{{ url_for('project_dashboard') }}">Projects</a></li>
+        <li><a href="{{ url_for('shoots_dashboard') }}">Shoots</a></li>
+        <li><a href="{{ url_for('deliverables') }}">Deliverables</a></li>
+        <li><a href="#">Payments</a></li>
+        <li><a href="#">Settings</a></li>
+        <li><a href="#">Tasks</a></li>
+        <li><a href="#">Galleries</a></li>
+        <li><a href="#">Proposals</a></li>
+        <li><a href="#">Forms</a></li>
+        <li><a href="#">Notifications</a></li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Navbar -->
+      <div class="navbar">
+        <input type="text" placeholder="Search client or title">
+        <a class="new-project" href="{{ url_for('new_project') }}">+ New Project</a>
+      </div>
+
+      <!-- Tables -->
+      <div class="table-container">
+        <h2>Projects</h2>
+        <table id="projects">
+          <thead>
+            <tr><th>Project</th><th>Client</th><th>Cost</th><th>Relation</th><th>Phone</th><th>Country</th><th>Email</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="table-container">
+        <h2>Shoots</h2>
+        <table id="shoots">
+          <thead>
+            <tr><th>Title</th><th>Date</th><th>City</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="table-container">
+        <h2>Deliverables</h2>
+        <table id="deliverables">
+          <thead>
+            <tr><th>Title</th><th>Cost</th><th>Due Date</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="table-container">
+        <h2>Payment Schedule</h2>
+        <table id="payment_schedule">
+          <thead>
+            <tr><th>Amount</th><th>Description</th><th>Due Date</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="table-container">
+        <h2>Received Payments</h2>
+        <table id="received_payments">
+          <thead>
+            <tr><th>Amount</th><th>Description</th><th>Paid On</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
